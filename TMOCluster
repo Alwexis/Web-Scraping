@@ -1,0 +1,32 @@
+// Un Cluster que puede agrupar todos los capítulos de un manga en una lista. Comenté mangas de distintas duraciones.
+const puppeteer = require('puppeteer');
+
+const puppeteer = require('puppeteer');
+
+(async () => {
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    page.setDefaultTimeout(60000);
+    page.setDefaultNavigationTimeout(60000);
+    //! Player Who Returned 10,000 Years Later
+    await page.goto('https://mangakakalot.com/manga/yn929447');
+    await page.waitForSelector('.chapter-list');
+    const links = await page.evaluate(() => {
+        let mangaTitle = document.getElementsByClassName('manga-info-text')[0].children[0].children[0].textContent;
+        const chapters = document.getElementsByClassName('chapter-list')[0].children;
+        let chaptersLink = [];
+        let chaptersNames = [];
+        for (let chapter of chapters) {
+            let title = chapter.children[0].textContent;
+            let link = chapter.children[0].children[0].href;
+            chaptersNames.push(title);
+            chaptersLink.push(link)
+        }
+        return {mangaTitle: mangaTitle, chapters: chaptersNames, chaptersLink: chaptersLink};
+    })
+    console.log('Manga: ' + links.mangaTitle);
+    console.log(links.chapters[0].length + ' Capítulo(s)');
+    console.table(links.chapters);
+    // ! console.table(links.chaptersLink); to see all links
+    browser.close();
+})();
